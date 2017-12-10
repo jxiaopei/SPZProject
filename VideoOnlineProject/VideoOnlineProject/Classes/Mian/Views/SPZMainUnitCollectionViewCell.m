@@ -51,7 +51,15 @@
 -(void)setDataModel:(SPZUnitDataModel *)dataModel{
     _dataModel = dataModel;
     _nameLabel.text = dataModel.fileName;
-     [_iconView sd_setImageWithURL:[NSURL URLWithString:BaseHost(dataModel.logo)] placeholderImage:ImagePlaceHolder];
+    [_iconView sd_setImageWithURL:[NSURL URLWithString:BaseHost(dataModel.logo)] placeholderImage:ImagePlaceHolder];
+    // completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
+//        NSData * imageData = UIImageJPEGRepresentation(image,1);
+//
+//        NSUInteger  length = [imageData length]/1024;
+//
+//        NSLog(@"图片大小 == %zd",length);
+//
+//    }];
 }
 
 

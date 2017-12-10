@@ -11,10 +11,11 @@
 
 @interface SPZMainPageDataModel : NSObject
 
-@property(nonatomic,strong)NSArray <SPZUnitDataModel *>*dataList;
+@property(nonatomic,strong)NSMutableArray <SPZUnitDataModel *>*dataList;
 @property(nonatomic,strong)NSMutableArray <SPZUnitDataModel *>*secondList;
 @property(nonatomic,copy)NSString *titleStr;
 @property(nonatomic,assign)BOOL isCountEnought;
 @property(nonatomic,assign)BOOL isChange;
+@property(nonatomic,assign)NSInteger count;
 
 @end

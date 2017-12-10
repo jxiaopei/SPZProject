@@ -13,6 +13,8 @@
 
 @interface AppDelegate ()
 
+@property(nonatomic,strong)UIView *backView;
+
 @end
 
 @implementation AppDelegate
@@ -23,21 +25,44 @@
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     SPZBaseTabBarController *tabBarVC = [SPZBaseTabBarController new];
-    [self.window setRootViewController:tabBarVC];//[ACPBaseViewController new]
+    [self.window setRootViewController:[SPZBaseViewController new]];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:@"UIApplicationDidEnterBackgroundNotification" object:nil];
     
     NSLog(@"uid == %@",[SPZUserModel shareModel].uid);
+    
     //友盟统计
     [self UMMobstatistics];
     
     //友盟推送
     [self addUMessage:launchOptions];
-//    [[SPZBaseNetworkServiceTool shareServiceTool] setNetWorkService];
-//    [self setupAnimationImage];
-    [[SPZBaseNetworkServiceTool shareServiceTool] getAppBaseInfors];
+    [[SPZBaseNetworkServiceTool shareServiceTool] httpDNSActionWithCompleteBlock:^{
+        [NSThread sleepForTimeInterval:5.0];
+        [_backView removeFromSuperview];
+        [self.window setRootViewController:tabBarVC];
+        [[SPZBaseNetworkServiceTool shareServiceTool] getUpdateInfor];
+    } failureBlock:^{
+        [NSThread sleepForTimeInterval:5.0];
+        [_backView removeFromSuperview];
+        [self.window setRootViewController:[SPZBaseViewController new]];
+        [self exitAction];
+        [[SPZBaseNetworkServiceTool shareServiceTool] getUpdateInfor];
+    }];
+    
+    [self setupAnimationImage];
+
     return YES;
 }
 
+-(void)exitAction{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:@"网络错误,请重新打开app"  preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *confirmAction = [UIAlertAction actionWithTitle:@"确认" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        exit(0);
+    }];
+    
+    [alert addAction:confirmAction];
+    
+    [self.window.rootViewController presentViewController:alert animated:YES completion:nil];
+}
 
 - (void)addUMessage:(NSDictionary *)launchOptions {
     
@@ -111,32 +136,34 @@
     
     UIView *backView = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     [self.window addSubview:backView];
-    __block UIImageView *igv = [[UIImageView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    igv.image = [UIImage imageNamed:@"爱彩票启动图1"];
-    //    igv.alpha = 0.5;
+    _backView = backView;
+    backView.backgroundColor = [UIColor whiteColor];
+    __block UIImageView *igv = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, SCREENWIDTH, SCREENWIDTH /15 * 47.2)];
+    igv.image = [UIImage imageNamed:@"引导页图片"];
     [backView addSubview:igv];
     
-    UIImageView *goldig = [[UIImageView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    goldig.image = [UIImage imageNamed:@"爱彩票启动图"];
-    //    goldig.alpha = 0;
+    UIImage *bottomImg = [UIImage imageNamed:@"引导页脚"];
+    CGFloat imgH = bottomImg.size.height / bottomImg.size.width * SCREENWIDTH ;
+    UIImageView *goldig = [[UIImageView alloc] initWithFrame:CGRectMake(0, SCREENHEIGHT - imgH, SCREENWIDTH, imgH)];
+    goldig.image = bottomImg;
     [backView addSubview:goldig];
     
     //    UIImageView *caishen = [[UIImageView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     //    caishen.image = [UIImage imageNamed:@"caishen"];
     //    [igv addSubview:caishen];
     
-    CGFloat x = [UIScreen mainScreen].bounds.origin.x;
-    CGFloat y = [UIScreen mainScreen].bounds.origin.y;
-    CGFloat width = SCREENWIDTH + 20;
-    CGFloat height = SCREENHEIGHT/SCREENWIDTH *(SCREENWIDTH + 20);
-    CGFloat newY = (height - SCREENHEIGHT)/2;
+//    CGFloat x = [UIScreen mainScreen].bounds.origin.x;
+//    CGFloat y = [UIScreen mainScreen].bounds.origin.y;
+//    CGFloat width = SCREENWIDTH + 20;
+//    CGFloat height = SCREENHEIGHT/SCREENWIDTH *(SCREENWIDTH + 20);
+//    CGFloat newY = (height - SCREENHEIGHT)/2;
     
-    [UIView animateWithDuration:1 animations:^{
-        igv.frame = CGRectMake(x - 10 , y - newY, width, height);
+    [UIView animateWithDuration:5 animations:^{
+        igv.frame = CGRectMake(0,SCREENHEIGHT - SCREENWIDTH /3 - SCREENWIDTH /15 * 47.2 + 50, SCREENWIDTH, SCREENWIDTH /15 * 47.2);
         //        igv.alpha = 1.0;
     } completion:^(BOOL finished) {
-        [NSThread sleepForTimeInterval:1.0];
-        [backView removeFromSuperview];
+//        [NSThread sleepForTimeInterval:1.0];
+//        [backView removeFromSuperview];
     }];
     
 }

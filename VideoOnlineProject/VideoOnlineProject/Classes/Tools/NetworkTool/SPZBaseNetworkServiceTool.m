@@ -8,14 +8,15 @@
 
 #import "SPZBaseNetworkServiceTool.h"
 #import "SPZBaseNetWorkServiceInforModel.h"
-#import "SPZBaseTabBarController.h"
-#import "SPZBaseViewController.h"
+//#import "SPZBaseTabBarController.h"
+//#import "SPZBaseViewController.h"
 
 @interface SPZBaseNetworkServiceTool ()
 
 @property(nonatomic,strong)NSMutableArray <SPZBaseNetWorkServiceInforModel *>*invalidUrlArr;
 
 @property(nonatomic,copy)NSString *updateUrl;
+@property(nonatomic,assign)NSInteger i;
 
 @end
 
@@ -31,21 +32,45 @@
     return tool;
 }
 
--(void)httpDNSAction{
+//六色因为没有握手一块的内容 所以设置了连续五次请求 成功则退出 失败会进入下一次 直至五次满 提示用户退出app
+-(void)httpDNSActionWithCompleteBlock:(void(^)())completeBlock failureBlock:(void(^)())failureBlock{
+
     [[SPZNetworkTool getInstance]getJsonWithUrl:AppHttpDNS parameters:nil success:^(id responseObject) {
         Log_ResponseObject;
-        
         NSString *ipStr = responseObject[@"currentData"];
         if([responseObject[@"currentStatus"] intValue] == 0){
-            YYCache *cache = [YYCache cacheWithName:CacheKey];
-            [cache setObject:[NSString stringWithFormat:@"http://%@:8080",ipStr] forKey:@"serviceHost"];
+            if([ipStr isNotNil]){
+                YYCache *cache = [YYCache cacheWithName:CacheKey];
+                [cache setObject:[NSString stringWithFormat:@"http://%@:9977",ipStr] forKey:@"serviceHost"];
+                completeBlock();
+                return ;
+            }else{
+                if(_i == 4){
+                    failureBlock();
+                }else{
+                    [self httpDNSActionWithCompleteBlock:completeBlock failureBlock:failureBlock];
+                    _i++;
+                }
+            }
+        }else{
+            if(_i == 4){
+                failureBlock();
+            }else{
+                [self httpDNSActionWithCompleteBlock:completeBlock failureBlock:failureBlock];
+                _i++;
+            }
         }
     } fail:^(NSError *error) {
-        
+        if(_i == 4){
+            failureBlock();
+        }else{
+            [self httpDNSActionWithCompleteBlock:completeBlock failureBlock:failureBlock];
+            _i++;
+        }
     }];
 }
 
--(void)setNetWorkService{
+-(void)setNetWorkServiceWithCompleteBlock:(void(^)())completeBlock failureBlock:(void(^)())failureBlock{
     
     NSDictionary *paramers = @{@"paramData":@{@"code":@"acp"},
                                @"uri":@"/getDomainMapper",
@@ -63,26 +88,25 @@
                         [self updateInvalidURLs];
                         YYCache *cache = [YYCache cacheWithName:CacheKey];
                         [cache setObject:inforModel.domain forKey:@"serviceHost"];
-                        
-//                        [[UIApplication sharedApplication] keyWindow].rootViewController = [SPZBaseTabBarController new]; //成功则指向tabBarController 失败则保留在空白页
-                        return ;
+                        completeBlock();
+                       
                     }callback:^{
                         [self.invalidUrlArr addObject:inforModel];
                         if(i == serviceInforArr.count - 1){
                             //测试域名全部失败 上传失效域名
                             [self updateInvalidURLs];
-                            [[UIApplication sharedApplication] keyWindow].rootViewController = [SPZBaseViewController new];
+                            failureBlock();
                         }
                     }];
                 }
             }
         }else{
-           [[UIApplication sharedApplication] keyWindow].rootViewController = [SPZBaseViewController new];
+           failureBlock();
         }
         
     } fail:^(NSError *error) {
         NSLog(@"%@",error.description);
-        [[UIApplication sharedApplication] keyWindow].rootViewController = [SPZBaseViewController new];
+        failureBlock();
     }];
     
 }
@@ -248,7 +272,9 @@
     [[self getCurrentVC] presentViewController:alert animated:YES completion:nil];
     
     [NSThread sleepForTimeInterval:3.0];
-    [[UIApplication sharedApplication]openURL:[NSURL URLWithString:self.updateUrl]];
+    [[UIApplication sharedApplication]openURL:[NSURL URLWithString:self.updateUrl] options:@{} completionHandler:^(BOOL success) {
+        exit(0);
+    }];
 }
 
 -(void)showUpdateAlertVCWithUpdateMsg:(NSString *)message{

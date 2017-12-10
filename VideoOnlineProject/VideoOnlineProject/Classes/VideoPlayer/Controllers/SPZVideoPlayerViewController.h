@@ -13,5 +13,6 @@
 @property(nonatomic,assign)NSInteger Id;
 @property(nonatomic,copy)NSString *titleStr;
 @property(nonatomic,copy)NSString *videoPath;
+@property(nonatomic,assign)BOOL isOpenVipTipView;
 
 @end

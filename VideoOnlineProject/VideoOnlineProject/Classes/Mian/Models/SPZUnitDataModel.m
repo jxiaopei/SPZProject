@@ -16,4 +16,28 @@
              };
 }
 
+-(NSString *)registerPic{
+    NSString *imgUrl = nil;
+    
+    if([_registerPic hasPrefix:@"http"]){
+        imgUrl = _registerPic;
+    }else{
+        imgUrl = BaseHost(_registerPic);
+    }
+    return imgUrl;
+}
+
+-(NSString *)confirmPic{
+    
+    NSString *imgUrl = nil;
+    
+    if([_confirmPic hasPrefix:@"http"]){
+        imgUrl = _confirmPic;
+    }else{
+        imgUrl = BaseHost(_confirmPic);
+    }
+    return imgUrl;
+    
+}
+
 @end

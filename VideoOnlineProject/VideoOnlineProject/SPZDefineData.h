@@ -20,8 +20,8 @@
 #define AppUpdateCode           @"a9170aa9edf6c67986f9da694a234b89"   //检测新版本更新code
 #define AppUpdatePeramters      @{@"code":AppUpdateCode}
 
-#define AppKey                  @"59eada12c62dca31c600084e"           //友盟appKey
-#define AppSecret               @"cwjna0e96kxedqikclbubwbujfyc8c9r"  //友盟app 秘钥
+#define AppKey                  @"5a2386a2f43e48681900005e"           //友盟appKey
+#define AppSecret               @"gfbvej3rrc8qn0oz0fxkqk5s5fmuby6e"  //友盟app 秘钥
 
 #define COMPANYPARA             @{@"app_id":@"1258070698"}            //appID
 #define CacheKey                @"ACPCacheKey"

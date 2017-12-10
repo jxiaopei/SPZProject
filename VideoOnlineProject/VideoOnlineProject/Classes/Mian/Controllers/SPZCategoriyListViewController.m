@@ -133,6 +133,7 @@
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
     SPZUnitDataModel *dataModel = _itemsArr[indexPath.row];
     SPZVideoPlayerViewController *videoPlayerVC = [SPZVideoPlayerViewController new];
+    videoPlayerVC.isOpenVipTipView = dataModel.openStatus;
     videoPlayerVC.Id = dataModel.Id;
     videoPlayerVC.titleStr = dataModel.fileName;
     videoPlayerVC.videoPath = BaseHost(dataModel.previewPath);

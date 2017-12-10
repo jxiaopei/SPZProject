@@ -25,7 +25,7 @@
         make.left.mas_equalTo(5);
         make.right.mas_equalTo(-5);
         make.top.mas_equalTo(0);
-        make.height.mas_equalTo(120);
+        make.height.mas_equalTo((SCREENWIDTH/2 - 15) * 1.5 - 30);
     }];
     iconView.contentMode = UIViewContentModeScaleAspectFill;//UIViewContentModeScaleAspectFit;
     iconView.layer.masksToBounds = YES;

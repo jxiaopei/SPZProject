@@ -93,6 +93,7 @@
     SPZVideoPlayerViewController *videoPlayerVC = [SPZVideoPlayerViewController new];
     SPZUnitDataModel *dataModel = _dataSource[indexPath.row];
     videoPlayerVC.Id = dataModel.Id;
+    videoPlayerVC.isOpenVipTipView = dataModel.openStatus;
     videoPlayerVC.titleStr = dataModel.fileName;
     videoPlayerVC.videoPath = BaseHost(dataModel.previewPath);
     [self.navigationController pushViewController:videoPlayerVC animated:YES];

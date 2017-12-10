@@ -30,10 +30,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self customTitleWith:@"我的"];
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(didLoginSuccessed) name:@"loginSuccessed" object:nil];
+//    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(didLoginSuccessed) name:@"loginSuccessed" object:nil];
     [self setupTableView];
-    
-    
 }
 
 -(void)viewWillAppear:(BOOL)animated{
@@ -43,10 +41,6 @@
 
 -(void)dealloc{
     [[NSNotificationCenter defaultCenter]removeObserver:self name:@"loginSuccessed" object:nil];
-}
-
--(void)didLoginSuccessed{
-    
 }
 
 -(void)setupTableView
@@ -86,10 +80,12 @@
     [header addSubview:accountLabel];
     [accountLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.mas_equalTo(iconView.mas_right).mas_offset(15);
-        make.top.mas_equalTo(iconView).mas_offset(10);
+        make.right.mas_equalTo(-15);
+        make.top.mas_equalTo(iconView);
     }];
-    accountLabel.text = @"游客";
+    accountLabel.text = [SPZUserModel shareModel].uid;
     accountLabel.font = [UIFont systemFontOfSize:15];
+    accountLabel.numberOfLines = 2;
     
     UILabel *levelLabel = [UILabel new];
     [header addSubview:levelLabel];
@@ -98,7 +94,7 @@
         make.top.mas_equalTo(accountLabel.mas_bottom).mas_offset(10);
     }];
     levelLabel.text = @"普通用户";
-    levelLabel.textColor = [UIColor purpleColor];
+    levelLabel.textColor = GlobalPurpleColor;
     levelLabel.font = [UIFont systemFontOfSize:14];
     
     UIButton *vipBtn = [UIButton new];
@@ -139,9 +135,12 @@
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"清理缓存" message:@"确定要清理缓存吗?" preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction *commitAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             CGFloat cacheSize = [SPZCleanCacheManager folderSizeAtPath];
+            NSString *baseURL = BaseHttpUrl;
+            
             [SPZCleanCacheManager cleanCache:^{
                 [MBProgressHUD showSuccess:[NSString stringWithFormat:@"成功清理%.2fM缓存空间",cacheSize]];
                  _cacheLabel.text = [NSString stringWithFormat:@"%.2fM",[SPZCleanCacheManager folderSizeAtPath]];
+                [[YYCache cacheWithName:CacheKey] setObject:baseURL forKey: @"serviceHost"];
             }];
         }];
         

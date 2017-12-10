@@ -42,6 +42,7 @@
 		882F83521FA0806C00C52A25 /* SPZBaseTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 882F83511FA0806C00C52A25 /* SPZBaseTableViewCell.m */; };
 		882F83551FA0814C00C52A25 /* SPZMainTitleCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 882F83541FA0814C00C52A25 /* SPZMainTitleCollectionViewCell.m */; };
 		883C28311FAC34B6001EB477 /* SPZAttentionTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 883C28301FAC34B6001EB477 /* SPZAttentionTableViewCell.m */; };
+		884438DB1FC6BC6B0079C861 /* SPZCatePhotoListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 884438DA1FC6BC6B0079C861 /* SPZCatePhotoListViewController.m */; };
 		887847A41FAAECDB000849B9 /* SPZCleanCacheManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 887847A31FAAECDB000849B9 /* SPZCleanCacheManager.m */; };
 		887847A71FAAFF62000849B9 /* SPZAboutUsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 887847A61FAAFF62000849B9 /* SPZAboutUsViewController.m */; };
 		887847AA1FAB0011000849B9 /* SPZAboutUsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 887847A91FAB0011000849B9 /* SPZAboutUsTableViewCell.m */; };
@@ -51,6 +52,7 @@
 		887847B81FAB147F000849B9 /* KeychainAccessGroups.plist in Resources */ = {isa = PBXBuildFile; fileRef = 887847B71FAB147F000849B9 /* KeychainAccessGroups.plist */; };
 		887847BC1FAB151B000849B9 /* SvUDIDTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 887847BB1FAB151B000849B9 /* SvUDIDTools.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		887847BF1FAB4887000849B9 /* SPZSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 887847BE1FAB4887000849B9 /* SPZSearchViewController.m */; };
+		888269581FC7EFED005E65EF /* SPZPhotoLikeCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 888269571FC7EFED005E65EF /* SPZPhotoLikeCell.m */; };
 		889C07E01FA4487E0011FDC3 /* SPZMainLikeCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 889C07DF1FA4487E0011FDC3 /* SPZMainLikeCell.m */; };
 		889C07E31FA44AF50011FDC3 /* SPZMainPageDataModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 889C07E21FA44AF50011FDC3 /* SPZMainPageDataModel.m */; };
 		889C07E61FA44B890011FDC3 /* SPZUnitDataModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 889C07E51FA44B890011FDC3 /* SPZUnitDataModel.m */; };
@@ -183,6 +185,8 @@
 		882F83541FA0814C00C52A25 /* SPZMainTitleCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPZMainTitleCollectionViewCell.m; sourceTree = "<group>"; };
 		883C282F1FAC34B6001EB477 /* SPZAttentionTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPZAttentionTableViewCell.h; sourceTree = "<group>"; };
 		883C28301FAC34B6001EB477 /* SPZAttentionTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPZAttentionTableViewCell.m; sourceTree = "<group>"; };
+		884438D91FC6BC6B0079C861 /* SPZCatePhotoListViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPZCatePhotoListViewController.h; sourceTree = "<group>"; };
+		884438DA1FC6BC6B0079C861 /* SPZCatePhotoListViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SPZCatePhotoListViewController.m; sourceTree = "<group>"; };
 		887847A21FAAECDB000849B9 /* SPZCleanCacheManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPZCleanCacheManager.h; sourceTree = "<group>"; };
 		887847A31FAAECDB000849B9 /* SPZCleanCacheManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPZCleanCacheManager.m; sourceTree = "<group>"; };
 		887847A51FAAFF62000849B9 /* SPZAboutUsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPZAboutUsViewController.h; sourceTree = "<group>"; };
@@ -200,6 +204,8 @@
 		887847BB1FAB151B000849B9 /* SvUDIDTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SvUDIDTools.m; sourceTree = "<group>"; };
 		887847BD1FAB4887000849B9 /* SPZSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPZSearchViewController.h; sourceTree = "<group>"; };
 		887847BE1FAB4887000849B9 /* SPZSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPZSearchViewController.m; sourceTree = "<group>"; };
+		888269561FC7EFED005E65EF /* SPZPhotoLikeCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPZPhotoLikeCell.h; sourceTree = "<group>"; };
+		888269571FC7EFED005E65EF /* SPZPhotoLikeCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SPZPhotoLikeCell.m; sourceTree = "<group>"; };
 		889C07DE1FA4487E0011FDC3 /* SPZMainLikeCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPZMainLikeCell.h; sourceTree = "<group>"; };
 		889C07DF1FA4487E0011FDC3 /* SPZMainLikeCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPZMainLikeCell.m; sourceTree = "<group>"; };
 		889C07E11FA44AF50011FDC3 /* SPZMainPageDataModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPZMainPageDataModel.h; sourceTree = "<group>"; };
@@ -269,6 +275,7 @@
 		889C085B1FA8466F0011FDC3 /* SPZCommentDataModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPZCommentDataModel.m; sourceTree = "<group>"; };
 		889C08601FA9C2700011FDC3 /* SPZPersonalTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPZPersonalTableViewCell.h; sourceTree = "<group>"; };
 		889C08611FA9C2700011FDC3 /* SPZPersonalTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPZPersonalTableViewCell.m; sourceTree = "<group>"; };
+		88B4571C1FD3BF0400D2E9B7 /* VideoOnlineProject.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VideoOnlineProject.entitlements; sourceTree = "<group>"; };
 		88C7D7271FB17A1F006D58E2 /* SPZUseHistoryViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPZUseHistoryViewController.h; sourceTree = "<group>"; };
 		88C7D7281FB17A1F006D58E2 /* SPZUseHistoryViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPZUseHistoryViewController.m; sourceTree = "<group>"; };
 		88F019081FAC58BF0058E2D7 /* SPZGameListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPZGameListViewController.h; sourceTree = "<group>"; };
@@ -339,6 +346,7 @@
 		882F82CC1FA0658100C52A25 /* VideoOnlineProject */ = {
 			isa = PBXGroup;
 			children = (
+				88B4571C1FD3BF0400D2E9B7 /* VideoOnlineProject.entitlements */,
 				882F83021FA06A5800C52A25 /* Classes */,
 				882F82CD1FA0658100C52A25 /* Supporting Files */,
 			);
@@ -453,6 +461,8 @@
 				889C07F71FA474530011FDC3 /* SPZCategoriesViewController.m */,
 				889C07FC1FA4A7300011FDC3 /* SPZCategoriyListViewController.h */,
 				889C07FD1FA4A7300011FDC3 /* SPZCategoriyListViewController.m */,
+				884438D91FC6BC6B0079C861 /* SPZCatePhotoListViewController.h */,
+				884438DA1FC6BC6B0079C861 /* SPZCatePhotoListViewController.m */,
 				887847BD1FAB4887000849B9 /* SPZSearchViewController.h */,
 				887847BE1FAB4887000849B9 /* SPZSearchViewController.m */,
 				88F019081FAC58BF0058E2D7 /* SPZGameListViewController.h */,
@@ -464,6 +474,7 @@
 		882F830B1FA06A5800C52A25 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				882F83531FA0814C00C52A25 /* SPZMainTitleCollectionViewCell.h */,
 				889C07E11FA44AF50011FDC3 /* SPZMainPageDataModel.h */,
 				889C07E21FA44AF50011FDC3 /* SPZMainPageDataModel.m */,
 				889C07ED1FA450740011FDC3 /* SPZItemDataModel.h */,
@@ -483,7 +494,6 @@
 		882F830C1FA06A5800C52A25 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				882F83531FA0814C00C52A25 /* SPZMainTitleCollectionViewCell.h */,
 				882F83541FA0814C00C52A25 /* SPZMainTitleCollectionViewCell.m */,
 				889C07DE1FA4487E0011FDC3 /* SPZMainLikeCell.h */,
 				889C07DF1FA4487E0011FDC3 /* SPZMainLikeCell.m */,
@@ -743,6 +753,8 @@
 				889C08441FA7117C0011FDC3 /* SPZPhotoCollectionViewCell.m */,
 				889C08511FA74DC20011FDC3 /* SPZPhotoRecCollectionViewCell.h */,
 				889C08521FA74DC20011FDC3 /* SPZPhotoRecCollectionViewCell.m */,
+				888269561FC7EFED005E65EF /* SPZPhotoLikeCell.h */,
+				888269571FC7EFED005E65EF /* SPZPhotoLikeCell.m */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -910,6 +922,11 @@
 						CreatedOnToolsVersion = 8.3.2;
 						DevelopmentTeam = 7W8E998SSL;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.Push = {
+								enabled = 1;
+							};
+						};
 					};
 					882F82E21FA0658100C52A25 = {
 						CreatedOnToolsVersion = 8.3.2;
@@ -1056,6 +1073,7 @@
 				882F830E1FA06A5800C52A25 /* NSString+InsertYMD.m in Sources */,
 				882F834F1FA07FBF00C52A25 /* SPZBaseCollectionViewCell.m in Sources */,
 				882F83361FA0718700C52A25 /* MBProgressHUD+MJ.m in Sources */,
+				884438DB1FC6BC6B0079C861 /* SPZCatePhotoListViewController.m in Sources */,
 				88C7D7291FB17A1F006D58E2 /* SPZUseHistoryViewController.m in Sources */,
 				883C28311FAC34B6001EB477 /* SPZAttentionTableViewCell.m in Sources */,
 				887847B01FAB05D5000849B9 /* SPZServiceCenterViewController.m in Sources */,
@@ -1065,6 +1083,7 @@
 				887847BC1FAB151B000849B9 /* SvUDIDTools.m in Sources */,
 				889C08191FA4B5120011FDC3 /* SPZPersonalViewController.m in Sources */,
 				889C07F21FA45E390011FDC3 /* SPZMainPageTableViewCell.m in Sources */,
+				888269581FC7EFED005E65EF /* SPZPhotoLikeCell.m in Sources */,
 				889C081C1FA4B52D0011FDC3 /* SPZTreasuresViewController.m in Sources */,
 				889C07E01FA4487E0011FDC3 /* SPZMainLikeCell.m in Sources */,
 				889C08531FA74DC20011FDC3 /* SPZPhotoRecCollectionViewCell.m in Sources */,
@@ -1252,11 +1271,11 @@
 			baseConfigurationReference = 076E66997377AA243A28B862 /* Pods-VideoOnlineProject.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_ENTITLEMENTS = VideoOnlineProject/VideoOnlineProject.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 7W8E998SSL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/VideoOnlineProject/Classes/Tools/UMeng",
@@ -1283,11 +1302,11 @@
 			baseConfigurationReference = 94119A8AC8A3E5DF643DF3E0 /* Pods-VideoOnlineProject.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_ENTITLEMENTS = VideoOnlineProject/VideoOnlineProject.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 7W8E998SSL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/VideoOnlineProject/Classes/Tools/UMeng",

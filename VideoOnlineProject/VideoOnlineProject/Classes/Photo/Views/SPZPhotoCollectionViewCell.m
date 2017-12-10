@@ -21,14 +21,19 @@
     [self addSubview:iconView];
     _iconView = iconView;
     [iconView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.mas_equalTo(5);
-        make.right.mas_equalTo(-5);
-        make.top.mas_equalTo(0);
-        make.bottom.mas_equalTo(0);
+        make.left.mas_equalTo(0);
+        make.right.mas_equalTo(0);
+        make.centerY.mas_equalTo(0);
+        make.height.mas_equalTo(SCREENHEIGHT - 64);
     }];
-    iconView.contentMode = UIViewContentModeScaleAspectFill;//UIViewContentModeScaleAspectFit;
+    iconView.contentMode = UIViewContentModeScaleAspectFit;
     iconView.layer.masksToBounds = YES;
-    iconView.layer.cornerRadius = 2;
+    iconView.layer.cornerRadius = 10;
+}
+
+-(void)setDataModel:(SPZUnitDataModel *)dataModel{
+    _dataModel = dataModel;
+    [_iconView sd_setImageWithURL:[NSURL URLWithString:BaseHost(dataModel.previewPath)] placeholderImage:ImagePlaceHolder];
 }
 
 -(void)setModel:(id)model{

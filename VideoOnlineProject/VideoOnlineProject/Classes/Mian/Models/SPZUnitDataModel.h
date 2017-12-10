@@ -30,6 +30,8 @@
 @property(nonatomic,assign)BOOL isOwned;
 @property(nonatomic,copy)NSString *registerPic;
 @property(nonatomic,copy)NSString *registerUrl;
+@property(nonatomic,copy)NSString *confirmPic;
+@property(nonatomic,assign)BOOL openStatus;
 
 @property(nonatomic,assign)BOOL isSelected;
 

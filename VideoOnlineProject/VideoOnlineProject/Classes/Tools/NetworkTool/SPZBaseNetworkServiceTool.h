@@ -12,12 +12,12 @@
 
 +(SPZBaseNetworkServiceTool *)shareServiceTool;
 
--(void)setNetWorkService;
+//-(void)setNetWorkService;
 
 -(void)getAppBaseInfors;
 
 -(void)getUpdateInfor;
 
--(void)httpDNSAction;
+-(void)httpDNSActionWithCompleteBlock:(void(^)())completeBlock failureBlock:(void(^)())failureBlock;
 
 @end

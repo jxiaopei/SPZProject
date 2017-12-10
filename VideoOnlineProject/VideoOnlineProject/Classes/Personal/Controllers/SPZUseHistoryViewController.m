@@ -227,6 +227,7 @@
     if([dataModel.fileName isNotNil]){
         SPZVideoPlayerViewController *videoPlayerVC = [SPZVideoPlayerViewController new];
         videoPlayerVC.Id = dataModel.filmId;
+        videoPlayerVC.isOpenVipTipView = dataModel.openStatus;
         videoPlayerVC.titleStr = dataModel.fileName;
         videoPlayerVC.videoPath = BaseHost(dataModel.pictPreviewPath);
         [self.navigationController pushViewController:videoPlayerVC animated:YES];

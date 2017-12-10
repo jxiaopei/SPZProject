@@ -12,9 +12,15 @@
 #import "SPZCommentDataModel.h"
 #import "SPZCommentTableViewCell.h"
 #import "SPZMainLikeCell.h"
+#import "SPZPhotoRecCollectionViewCell.h"
 #import "SPZBaseWebViewController.h"
+#import "SPZPhotoViewController.h"
 
-@interface SPZVideoPlayerViewController ()<UITableViewDelegate,UITableViewDataSource,UICollectionViewDelegate,UICollectionViewDataSource>
+#define VideoAllowedSeconds  30  //非vip允许观看时长 单位 秒
+
+@interface SPZVideoPlayerViewController ()<UICollectionViewDelegate,UICollectionViewDataSource>
+
+@property(nonnull,strong)UIScrollView *scrollView;
 
 @property (strong, nonatomic) UIView *backView;
 @property (nonatomic,strong) AVPlayer *player;
@@ -39,8 +45,9 @@
 
 @property(nonatomic,strong)NSArray <SPZUnitDataModel *>*likeList;
 @property(nonatomic,strong)UICollectionView *collectView;
-@property(nonatomic,strong)UITableView *tableView;
-@property(nonatomic,strong)NSArray <SPZCommentDataModel *>*dataSource;
+@property(nonatomic,strong)UICollectionView *photoView;
+@property(nonatomic,strong)NSMutableArray <SPZUnitDataModel *>*dataSource;
+@property(nonatomic,assign)NSInteger pageNum;
 @property(nonatomic,strong)SPZUnitDataModel *dataModel;
 
 @property(nonatomic,assign)NSInteger seconds;
@@ -49,8 +56,11 @@
 
 @property(nonatomic,assign)BOOL isVip;
 @property(nonatomic,assign)BOOL isHavePush;
-//@property(nonatomic,copy)NSString *registUrl;
 @property(nonatomic,assign)CGSize imageSize;
+@property(nonatomic,assign)CGFloat imgH;
+
+@property(nonatomic,strong)UIImage *registImg;
+@property(nonatomic,strong)UIImage *comfirtImg;
 
 @end
 
@@ -61,10 +71,13 @@
 //    self.automaticallyAdjustsScrollViewInsets = NO;
     [self customBackBtn];
     [self setupPlayerUI];
-    [self setupTableView];
+    [self setupScrollView];
+    [self setupHeaderView];
+    [self setupCollectionView];
     [self setupRightBtn];
     _isVip = NO;
-    
+    _pageNum = 1;
+    _imgH = (SCREENWIDTH/2 - 15) * 1.5 + 2;
 }
 
 -(void)viewWillAppear:(BOOL)animated{
@@ -105,13 +118,28 @@
                            @"mediaUID":[SPZUserModel shareModel].uid,
                            };
     [[SPZNetworkTool getInstance]postJsonWithUrl:VideoDetail parameters:dict success:^(id responseObject) {
-        [_tableView.mj_header endRefreshing];
         if([responseObject[@"currentStatus"] integerValue]  == 0){
             _dataModel = [SPZUnitDataModel mj_objectWithKeyValues:responseObject[@"currentData"][0]];
             _attentionBtn.selected = _dataModel.isOwned;
+//            _isOpenVipTipView = _dataModel.openStatus;
+            //异步先下载图片
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            
+                NSData *registImgData = [NSData dataWithContentsOfURL:[NSURL URLWithString:_dataModel.registerPic]];
+                if(registImgData){
+                    UIImage *registImg = [UIImage imageWithData:registImgData];
+                    _registImg = registImg;
+                }
+                
+                NSData *comfirtImgData = [NSData dataWithContentsOfURL:[NSURL URLWithString:_dataModel.confirmPic]];
+                if(comfirtImgData){
+                    UIImage *comfirtImg = [UIImage imageWithData:comfirtImgData];
+                    _comfirtImg = comfirtImg;
+                }
+            });
+            
         }
     } fail:^(NSError *error) {
-        [_tableView.mj_header endRefreshing];
         [MBProgressHUD showError:@"网络错误"];
     }];
     
@@ -119,16 +147,71 @@
                                  @"pageSize":@10,
                            };
     [[SPZNetworkTool getInstance]postJsonWithUrl:HomeLikeList parameters:parameters success:^(id responseObject) {
-        [_tableView.mj_header endRefreshing];
         if([responseObject[@"currentStatus"] integerValue]  == 0){
             _likeList = [SPZUnitDataModel mj_objectArrayWithKeyValuesArray:responseObject[@"currentData"][@"currentData"]];
             [_collectView reloadData];
         }
     } fail:^(NSError *error) {
-        [_tableView.mj_header endRefreshing];
         [MBProgressHUD showError:@"网络错误"];
     }];
+    NSDictionary *paramters = @{@"pageNum":@(_pageNum),
+                                @"pageSize":@10,
+                                };
+    [[SPZNetworkTool getInstance]postJsonWithUrl:PhotoLikeList parameters:paramters success:^(id responseObject) {
+        if([responseObject[@"currentStatus"] integerValue]  == 0){
+            if(_pageNum == 1){
+                [_scrollView.mj_header endRefreshing];
+                [_scrollView.mj_footer endRefreshing];
+                _dataSource = [SPZUnitDataModel mj_objectArrayWithKeyValuesArray:responseObject[@"currentData"][@"currentData"]];
+            }else{
+                NSMutableArray *mutableArr = [NSMutableArray array];
+                mutableArr = [SPZUnitDataModel mj_objectArrayWithKeyValuesArray:responseObject[@"currentData"][@"currentData"]];;
+                if(!mutableArr.count)
+                {
+                    [_scrollView.mj_footer endRefreshingWithNoMoreData];
+                }else{
+                    [_scrollView.mj_footer endRefreshing];
+                    [self.dataSource addObjectsFromArray:mutableArr];
+                }
+            }
+            CGFloat viewH = self.dataSource.count % 2 == 1 ? (self.dataSource.count/2 + 1) * _imgH + 30 : self.dataSource.count/2 *_imgH + 30;
+            _photoView.frame = CGRectMake(10, 200, SCREENWIDTH - 20,viewH );
+            _scrollView.contentSize = CGSizeMake(SCREENWIDTH, viewH + 200 );
+            [_photoView reloadData];
+        }else{
+            [_scrollView.mj_header endRefreshing];
+            [_scrollView.mj_footer endRefreshing];
+        }
+        
+        
+    } fail:^(NSError *error) {
+        [_scrollView.mj_header endRefreshing];
+        [_scrollView.mj_footer endRefreshing];
+    }];
+}
+
+-(void)setupScrollView
+{
+    UIScrollView *scrollView = [UIScrollView new];
+    scrollView.frame = CGRectMake(0, SCREENWIDTH / 1.5, SCREENWIDTH, SCREENHEIGHT - 64 - SCREENWIDTH / 1.5);
+    [self.view addSubview:scrollView];
+    _scrollView = scrollView;
+    scrollView.tag = 1000;
+    scrollView.bounces = NO;
+    scrollView.delegate = self;
+    scrollView.backgroundColor = [UIColor whiteColor];
+    scrollView.contentSize = CGSizeMake(SCREENWIDTH , SCREENHEIGHT - 64);
     
+    MJRefreshStateHeader *header = [MJRefreshStateHeader headerWithRefreshingBlock:^{
+        _pageNum = 1;
+        [self getData];
+    }];
+    scrollView.mj_header = header;
+    MJRefreshAutoStateFooter *footer = [MJRefreshAutoStateFooter footerWithRefreshingBlock:^{
+        _pageNum++;
+        [self getData];
+    }];
+    scrollView.mj_footer = footer;
 }
 
 -(void)setupRightBtn{
@@ -178,10 +261,11 @@
    
 }
 
--(UIView *)setupHeaderView{
+-(void)setupHeaderView{
     
     UIView *headerView = [UIView new];
     headerView.frame = CGRectMake(0, 0, SCREENWIDTH,190);
+    [_scrollView addSubview:headerView];
 //    headerView.backgroundColor = [UIColor yellowColor];
     UIView *verView = [UIView new];
     [headerView addSubview:verView];
@@ -203,6 +287,7 @@
     layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
     UICollectionView *collectView = [[UICollectionView alloc]initWithFrame:CGRectMake(10, 30, SCREENWIDTH - 20, 130) collectionViewLayout:layout];
     _collectView = collectView;
+    collectView.tag = 100;
     [headerView addSubview:collectView];
     collectView.delegate = self;
     collectView.dataSource = self;
@@ -219,7 +304,7 @@
     [headerView addSubview:verView1];
     verView1.frame = CGRectMake(10, 175, 2, 15);
     verView1.backgroundColor = GlobalPurpleColor;
-    
+
     UILabel *titleLabel1 = [UILabel new];
     [headerView addSubview:titleLabel1];
     [titleLabel1 mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -227,25 +312,26 @@
         make.centerY.mas_equalTo(verView1.mas_centerY);
     }];
     titleLabel1.font = [UIFont systemFontOfSize:13];
-    titleLabel1.text = @"评论";
+    titleLabel1.text = @"高清写真";
     
-    return headerView;
+//    return headerView;
 }
 
--(void)setupTableView{
-    UITableView *tableView = [UITableView new];
-    _tableView = tableView;
-    [self.view addSubview:tableView];
-    tableView.frame = CGRectMake(0, SCREENWIDTH / 1.5, SCREENWIDTH, SCREENHEIGHT - 64 - 49 - SCREENWIDTH / 1.5);
-    //    tableView.backgroundColor = GlobalLightGreyColor;
-    tableView.dataSource = self;
-    tableView.delegate =self;
-    tableView.showsVerticalScrollIndicator = NO;
-    [tableView registerClass:[SPZCommentTableViewCell class] forCellReuseIdentifier:@"commentCell"];
-    tableView.tableFooterView = [UIView new];
-    tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-    tableView.rowHeight = 180;
-    tableView.tableHeaderView = [self setupHeaderView];
+-(void)setupCollectionView{
+    UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc]init];
+    layout.itemSize = CGSizeMake(SCREENWIDTH/2 - 15,(SCREENWIDTH/2 - 15) * 1.5);
+    layout.minimumInteritemSpacing = 2;
+    layout.minimumLineSpacing = 2;
+    layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+    UICollectionView *collectView = [[UICollectionView alloc]initWithFrame:CGRectMake(10, 200, SCREENWIDTH - 20, SCREENHEIGHT - 165 - 64) collectionViewLayout:layout];
+    _photoView = collectView;
+    [_scrollView addSubview:collectView];
+    collectView.tag = 200;
+    collectView.delegate = self;
+    collectView.dataSource = self;
+    collectView.scrollEnabled = NO;
+    [collectView registerClass:[SPZPhotoRecCollectionViewCell class] forCellWithReuseIdentifier:@"photosCell"];
+    collectView.backgroundColor = [UIColor whiteColor];
 }
 
 - (void)setupPlayerUI{
@@ -369,7 +455,7 @@
 
 #pragma mark - 暂停或者播放
 - (void)pauseOrPlay:(UIButton *)sender{
-    if(_isHavePush){
+    if(_isOpenVipTipView &&_isHavePush){
         [self initVipViewWithTitle:@"点击图片注册VIP" detail:@"尚未开通会员或会员已过期,开通会员可享受高清无码大片!"];
         return;
     }
@@ -457,7 +543,7 @@
         weakSelf.backView.frame = CGRectMake(0, 0, SCREENWIDTH, SCREENWIDTH / 1.5);
         weakSelf.playerLayer.frame =  weakSelf.backView.bounds;
         [weakSelf.view addSubview:weakSelf.backView];
-
+        
         [self.bottomView mas_remakeConstraints:^(MASConstraintMaker *make) {
             make.height.mas_equalTo(30);
             make.left.right.mas_equalTo(0);
@@ -474,10 +560,8 @@
 
 #pragma mark - 单击手势
 - (void)singleTap:(UITapGestureRecognizer *)tap{
-    
     [UIView animateWithDuration:1.0 animations:^{
-        if (self.bottomView.alpha == 1)
-        {
+        if (self.bottomView.alpha == 1){
             self.bottomView.alpha = 0;
         }else if (self.bottomView.alpha == 0){
             self.bottomView.alpha = 1;
@@ -497,7 +581,7 @@
 // 点击调用  或者 拖拽完毕的时候调用
 - (void)sliderTapValueChange:(UISlider *)slider
 {
-    if(!_isVip){
+    if( _isOpenVipTipView &&!_isVip){
         [self initVipViewWithTitle:@"点击图片注册VIP" detail:@"自由操控进度,想看哪就看哪,开通会员可享受高清无码大片!"];
         [self.player pause];
         [self.playButton setImage:[UIImage imageNamed:@"play"] forState:UIControlStateNormal];
@@ -511,7 +595,7 @@
 // 点击Slider
 - (void)touchSlider:(UITapGestureRecognizer *)tap
 {
-    if(!_isVip){
+    if( _isOpenVipTipView &&!_isVip){
         [self initVipViewWithTitle:@"点击图片注册VIP" detail:@"自由操控进度,想看哪就看哪,开通会员可享受高清无码大片!"];
         [self.playButton setImage:[UIImage imageNamed:@"play"] forState:UIControlStateNormal];
         [self.player pause];
@@ -600,14 +684,14 @@
     
     if (self.player.rate == 1){
         
-        if(!_isVip){
-            if(_seconds == 60){
+        if( _isOpenVipTipView &&!_isVip){
+            if(_seconds == VideoAllowedSeconds){
                 [self initVipViewWithTitle:@"点击图片注册VIP" detail:@"尚未开通会员或会员已过期,开通会员可享受高清无码大片!"];
                 _bottomSeconds = 0;
                 self.bottomView.alpha = 1;
                 [self.player pause];
                 [self.playButton setImage:[UIImage imageNamed:@"play"] forState:UIControlStateNormal];
-//                self.playButton.enabled = NO;
+                self.playButton.enabled = NO;
                 self.isHavePush = YES;
                 return;
             }
@@ -629,51 +713,8 @@
     markView.backgroundColor = GlobalMarkViewColor;
     _markView = markView;
     
-    CGFloat imgW = SCREENWIDTH - 20;
-    
     UIImageView *vipBackImage = [UIImageView new];
     [markView addSubview:vipBackImage];
-    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(didClickContactImgView:)];
-    [vipBackImage addGestureRecognizer:tap];
-    vipBackImage.userInteractionEnabled = YES;
-    
-//    UILabel *titleLabel = [UILabel new];
-//    [vipBackImage addSubview:titleLabel];
-//    titleLabel.font = [UIFont systemFontOfSize:20];
-//    titleLabel.textColor = [UIColor whiteColor];
-//    titleLabel.text = title;
-//
-//    [titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.centerX.mas_equalTo(0);
-//        make.top.mas_equalTo((SCREENWIDTH - 20)/6);
-//    }];
-//
-//    UILabel *detailLabel = [UILabel new];
-//    [vipBackImage addSubview:detailLabel];
-//    detailLabel.numberOfLines = 2;
-//    detailLabel.font = [UIFont systemFontOfSize:14];
-////    detailLabel.adjustsFontSizeToFitWidth = YES;
-//    detailLabel.textColor = [UIColor whiteColor];
-//    detailLabel.text = detail;
-//
-//    [detailLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.top.mas_equalTo(titleLabel.mas_bottom).mas_offset(10);
-//        make.centerX.mas_equalTo(0);
-//        make.width.mas_equalTo((SCREENWIDTH - 20)*0.65);
-//    }];
-//
-//    UIImageView *contactImgView = [UIImageView new];
-//    [vipBackImage addSubview:contactImgView];
-//    [contactImgView mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.top.mas_equalTo(detailLabel.mas_bottom).mas_offset(10);
-//        make.centerX.mas_equalTo(0);
-//        make.width.mas_equalTo((SCREENWIDTH - 20)*0.65);
-//        make.height.mas_equalTo((SCREENWIDTH - 20)*0.25);
-//    }];
-//    contactImgView.userInteractionEnabled = YES;
-//    [contactImgView sd_setImageWithURL:[NSURL URLWithString:BaseHost(_dataModel.registerPic)] placeholderImage:ImagePlaceHolder];
-//    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(didClickContactImgView:)];
-//    [contactImgView addGestureRecognizer:tap];
     
     UIButton *cancelBtn = [UIButton new];
     [markView addSubview:cancelBtn];
@@ -682,40 +723,25 @@
     
     UIButton *comfirmBtn = [UIButton new];
     [markView addSubview:comfirmBtn];
-    comfirmBtn.backgroundColor = [UIColor whiteColor];
+    comfirmBtn.backgroundColor = GlobalPurpleColor;
     comfirmBtn.layer.masksToBounds = YES;
     comfirmBtn.layer.cornerRadius = 5;
     comfirmBtn.titleLabel.font = [UIFont systemFontOfSize:17];
-    [comfirmBtn setTitle:@"确认已注册" forState:UIControlStateNormal];
-    [comfirmBtn setTitleColor:GlobalPurpleColor forState:UIControlStateNormal];
+    [comfirmBtn setTitle:@"点击看更多" forState:UIControlStateNormal];
     [comfirmBtn addTarget:self action:@selector(didClickComfirmRegistBtn:) forControlEvents:UIControlEventTouchUpInside];
     
     if(self.isFullScreen){
         markView.transform = CGAffineTransformMakeRotation(-M_PI_2);
         markView.frame = CGRectMake(0, 0, SCREENWIDTH, SCREENHEIGHT);
         
-        [vipBackImage sd_setImageWithURL:[NSURL URLWithString:BaseHost(_dataModel.registerPic)] placeholderImage:ImagePlaceHolder completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
-            
-            [vipBackImage mas_makeConstraints:^(MASConstraintMaker *make) {
-                make.left.mas_equalTo((SCREENHEIGHT- imgW)/2);
-                make.top.mas_equalTo((SCREENWIDTH - image.size.height * imgW / image.size.width)/2);
-                make.height.mas_equalTo(image.size.height * imgW / image.size.width);
-                make.width.mas_equalTo(imgW);
+        if(_registImg){
+            vipBackImage.image = _registImg;
+            [self setFullViewConstraintsWithVipBackImage:vipBackImage cancelBtn:cancelBtn comfirmBtn:comfirmBtn img:_registImg];
+        }else{
+            [vipBackImage sd_setImageWithURL:[NSURL URLWithString:_dataModel.registerPic] placeholderImage:ImagePlaceHolder completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
+                [self setFullViewConstraintsWithVipBackImage:vipBackImage cancelBtn:cancelBtn comfirmBtn:comfirmBtn img:image];
             }];
-            
-            [cancelBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-                make.top.mas_equalTo(vipBackImage.mas_top).mas_offset(10);
-                make.right.mas_equalTo(vipBackImage.mas_right).mas_offset(-10);
-                make.width.height.mas_equalTo(30);
-            }];
-            
-            [comfirmBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-                make.left.mas_equalTo((SCREENHEIGHT- imgW + 120)/2);
-                make.bottom.mas_equalTo(vipBackImage.mas_bottom).mas_offset(-(imgW)/10);
-                make.width.mas_equalTo(imgW *0.65);
-                make.height.mas_equalTo(30);
-            }];
-        }];
+        }
         
         // 加到window上面
         [[UIApplication sharedApplication].keyWindow addSubview:markView];
@@ -724,41 +750,83 @@
         
         markView.frame = CGRectMake(0, 0, SCREENWIDTH, SCREENHEIGHT - 64);
         
-        [vipBackImage sd_setImageWithURL:[NSURL URLWithString:BaseHost(_dataModel.registerPic)] placeholderImage:ImagePlaceHolder completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
-            
-            [vipBackImage mas_makeConstraints:^(MASConstraintMaker *make) {
-                make.height.mas_equalTo(image.size.height * imgW / image.size.width);
-                make.width.mas_equalTo(imgW);
-                make.left.mas_equalTo((SCREENWIDTH - imgW)/2);
-                make.centerY.mas_equalTo(0);
+        if(_registImg){
+            vipBackImage.image = _registImg;
+            [self setConstraintsWithVipBackImage:vipBackImage cancelBtn:cancelBtn comfirmBtn:comfirmBtn img:_registImg];
+        }else{
+            [vipBackImage sd_setImageWithURL:[NSURL URLWithString:_dataModel.registerPic] placeholderImage:ImagePlaceHolder completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
+                [self setConstraintsWithVipBackImage:vipBackImage cancelBtn:cancelBtn comfirmBtn:comfirmBtn img:image];
             }];
-            
-            [cancelBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-                make.top.mas_equalTo(vipBackImage.mas_top).mas_offset(10);
-                make.right.mas_equalTo(-40);
-                make.width.height.mas_equalTo(30);
-            }];
-            
-            [comfirmBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-                make.centerX.mas_equalTo(0);
-                make.bottom.mas_equalTo(vipBackImage.mas_bottom).mas_offset(-(imgW)/10);
-                make.width.mas_equalTo(imgW * 0.65);
-                make.height.mas_equalTo(30);
-            }];
-            
-        }];
+        }
         
         [self.view addSubview:markView];
     }
 
 }
 
--(void)didClickContactImgView:(UITapGestureRecognizer *)tap{
-    [self registAction];
+//根据图片设置竖屏弹窗约束
+-(void)setConstraintsWithVipBackImage:(UIImageView *)vipBackImage cancelBtn:(UIButton *)cancelBtn comfirmBtn:(UIButton *)comfirmBtn img:(UIImage *)image{
+    CGFloat imgW = SCREENWIDTH - 20;
+//    CGFloat imgfH = SCREENWIDTH - 60;
+    NSData * imageData = UIImageJPEGRepresentation(image,1);
+    
+    NSUInteger  length = [imageData length]/1024;
+    NSLog(@"图片大小 == %zd",length);
+    [vipBackImage mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(image.size.height * imgW / image.size.width);
+        make.width.mas_equalTo(imgW);
+        make.left.mas_equalTo((SCREENWIDTH - imgW)/2);
+        make.centerY.mas_equalTo(0);
+    }];
+    
+    [cancelBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(vipBackImage.mas_top).mas_offset(-40);
+        make.right.mas_equalTo(-20);
+        make.width.height.mas_equalTo(30);
+    }];
+    
+    [comfirmBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.mas_equalTo(0);
+        make.bottom.mas_equalTo(vipBackImage.mas_bottom).mas_offset(-(imgW)/10);
+        make.width.mas_equalTo(imgW * 0.65);
+        make.height.mas_equalTo(30);
+    }];
+}
+
+//根据图片设置全屏弹窗约束
+-(void)setFullViewConstraintsWithVipBackImage:(UIImageView *)vipBackImage cancelBtn:(UIButton *)cancelBtn comfirmBtn:(UIButton *)comfirmBtn img:(UIImage *)image{
+//    CGFloat imgW = SCREENWIDTH - 20;
+    CGFloat imgfH = SCREENWIDTH - 60;
+    NSData * imageData = UIImageJPEGRepresentation(image,1);
+    
+    NSUInteger  length = [imageData length]/1024;
+    NSLog(@"图片大小 == %zd",length);
+    
+    CGFloat imgfW = imgfH * image.size.width / image.size.height;
+    [vipBackImage mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo((SCREENHEIGHT- imgfW)/2);
+        make.top.mas_equalTo(50);
+        make.height.mas_equalTo(imgfH);
+        make.width.mas_equalTo(imgfW);
+    }];
+    
+    [cancelBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(vipBackImage.mas_top).mas_offset(-40);
+        make.right.mas_equalTo(vipBackImage.mas_right).mas_offset(-10);
+        make.width.height.mas_equalTo(30);
+    }];
+    
+    [comfirmBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo((SCREENHEIGHT - 180)/2);
+        make.bottom.mas_equalTo(vipBackImage.mas_bottom).mas_offset(-(imgfH)/10);
+        make.width.mas_equalTo(180);
+        make.height.mas_equalTo(30);
+    }];
+    
 }
 
 -(void)registAction{
-    if(_isFullScreen){
+    if(_isOpenVipTipView && _isFullScreen){
         [self clickFullScreen:self.fullScreenButton];
         [_markView removeFromSuperview];
         [self initVipViewWithTitle:@"点击图片注册VIP" detail:@"尚未开通会员或会员已过期,开通会员可享受高清无码大片!"];
@@ -770,21 +838,41 @@
 }
 
 -(void)didClickComfirmRegistBtn:(UIButton *)sender{
-    NSDictionary *dict = @{@"mediaUID":[SPZUserModel shareModel].uid,
-                           @"id":@(_Id),
-                           };
-    [[SPZNetworkTool getInstance]postJsonWithUrl:ComfirmVipRegist parameters:dict success:^(id responseObject) {
-        if([responseObject[@"currentStatus"] integerValue]  == 0){
-            _isVip = YES;
-            _isHavePush = NO;
-        }else if ([responseObject[@"currentStatus"] integerValue]  == 1){
-            _isVip = NO;
+    
+    if(!sender.selected){
+        sender.selected = YES;
+        [sender setTitle:@"确认已注册" forState:UIControlStateNormal];
+        for(int i = 0;i < sender.superview.subviews.count;i++){
+            if([sender.superview.subviews[i]isKindOfClass:[UIImageView class]]){
+                UIImageView *vipBackImage = sender.superview.subviews[i];
+                if(_comfirtImg){
+                    vipBackImage.image = _comfirtImg;
+                }else{
+                    [vipBackImage sd_setImageWithURL:[NSURL URLWithString:_dataModel.confirmPic] placeholderImage:ImagePlaceHolder];
+                }
+                
+            }
         }
-        [_markView removeFromSuperview];
-    } fail:^(NSError *error) {
-        [MBProgressHUD showError:@"网络错误"];
-        [_markView removeFromSuperview];
-    }];
+        [self registAction];
+    }else{
+        sender.selected = NO;
+        
+        NSDictionary *dict = @{@"mediaUID":[SPZUserModel shareModel].uid,
+                               @"id":@(_Id),
+                               };
+        [[SPZNetworkTool getInstance]postJsonWithUrl:ComfirmVipRegist parameters:dict success:^(id responseObject) {
+            if([responseObject[@"currentStatus"] integerValue]  == 0){
+                _isVip = YES;
+                _isHavePush = NO;
+            }else if ([responseObject[@"currentStatus"] integerValue]  == 1){
+                _isVip = NO;
+            }
+            [_markView removeFromSuperview];
+        } fail:^(NSError *error) {
+            [MBProgressHUD showError:@"网络错误"];
+            [_markView removeFromSuperview];
+        }];
+    }
 }
 
 -(void)didClickCancelBtn:(UIButton *)sender{
@@ -821,36 +909,44 @@
     return [fotmmatter stringFromDate:date];
 }
 
--(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    return self.dataSource.count;
-}
-
--(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-    SPZCommentTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"commentCell" forIndexPath:indexPath];
-    cell.dataModel = self.dataSource[indexPath.row];
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    return cell;
-}
-
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
-    SPZUnitDataModel *dataModel = _likeList[indexPath.row];
-    SPZVideoPlayerViewController *videoPlayerVC = [SPZVideoPlayerViewController new];
-    videoPlayerVC.Id = dataModel.Id;
-    videoPlayerVC.titleStr = dataModel.fileName;
-    videoPlayerVC.videoPath = BaseHost(dataModel.previewPath);
-    [self.navigationController pushViewController:videoPlayerVC animated:YES];
+    if(collectionView.tag == 100){
+        SPZUnitDataModel *dataModel = _likeList[indexPath.row];
+        SPZVideoPlayerViewController *videoPlayerVC = [SPZVideoPlayerViewController new];
+        videoPlayerVC.Id = dataModel.Id;
+        videoPlayerVC.isOpenVipTipView = dataModel.openStatus;
+        videoPlayerVC.titleStr = dataModel.fileName;
+        videoPlayerVC.videoPath = BaseHost(dataModel.previewPath);
+        [self.navigationController pushViewController:videoPlayerVC animated:YES];
+    }else{
+        SPZPhotoViewController *photoVC = [SPZPhotoViewController new];
+        SPZUnitDataModel *dataModel = _dataSource[indexPath.item];
+        photoVC.Id = dataModel.Id;
+        photoVC.titleStr = dataModel.pictureName;
+        [self.navigationController pushViewController:photoVC animated:YES];
+    }
 }
 
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    return _likeList.count;
+    if(collectionView.tag == 100){
+        return _likeList.count;
+    }else{
+        return _dataSource.count;
+    }
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
     
-    SPZMainLikeCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"videoLikeCell" forIndexPath:indexPath];
-    cell.dataModel = _likeList[indexPath.item];
-    return cell;
+    if(collectionView.tag == 100){
+        SPZMainLikeCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"videoLikeCell" forIndexPath:indexPath];
+        cell.dataModel = _likeList[indexPath.item];
+        return cell;
+    }else{
+        SPZPhotoRecCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"photosCell" forIndexPath:indexPath];
+        cell.dataModel = _dataSource[indexPath.item];
+        return cell;
+    }
 }
 
 @end

@@ -23,7 +23,7 @@
     }
 }
 
--(void)setDataList:(NSArray<SPZUnitDataModel *> *)dataList{
+-(void)setDataList:(NSMutableArray<SPZUnitDataModel *> *)dataList{
     _dataList = dataList;
     _secondList = [NSMutableArray array];
     if(self.isCountEnought){

@@ -428,6 +428,7 @@
     if(tableView.tag ==0){
         SPZVideoPlayerViewController *videoPlayerVC = [SPZVideoPlayerViewController new];
         dataModel = _dataSource[indexPath.row];
+        videoPlayerVC.isOpenVipTipView = dataModel.openStatus;
         videoPlayerVC.Id = dataModel.Id;
         videoPlayerVC.titleStr = dataModel.fileName;
         videoPlayerVC.videoPath = BaseHost(dataModel.previewPath);

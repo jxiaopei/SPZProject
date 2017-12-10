@@ -21,6 +21,7 @@
 @property(nonatomic,copy)NSString *remark;
 @property(nonatomic,copy)NSString *removed;
 @property(nonatomic,copy)NSString *titleName;
+@property(nonatomic,assign)NSInteger type;
 
 
 @end

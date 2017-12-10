@@ -11,7 +11,7 @@
 
 #define NETWORK_STATE 1  //1是正式环境 0是测试环境
 
-#define BaseHttpUrl   NETWORK_STATE ?  @"http://101.102.225.216:9977" : @"http://172.16.3.237:9977" //@"http://101.102.225.216:9977" @"http://172.16.1.69:9977" @"http://172.16.6.99:9977"
+#define BaseHttpUrl   NETWORK_STATE ?  [[YYCache cacheWithName:CacheKey] objectForKey:@"serviceHost"] : @"http://172.16.3.237:9977" //@"http://101.102.225.216:9977" @"http://172.16.1.69:9977" @"http://172.16.6.99:9977"
 
 #define BaseUrl(url)   [NSString stringWithFormat:@"%@%@",BaseHttpUrl,url]
 #define BaseHost(url)  [SPZNetworkTool contectbaseHostWithPath:url]
@@ -21,7 +21,7 @@
 #define AppCheckHostAvailable   @"/user/homepage/checkDomainName"                              //握手
 #define AppUpdateUrl            @"https://tpfw.083075.com/system/getAppLastChange"             //检测新版本更新
 #define AppInitialize           @"/user/homepage/getLotteryInitialization"                     //app初始化信息接口
-#define AppHttpDNS              @"http://47.74.19.250:9888/dns/queryDNS?uri=acp58.com"         //app初始化HttpDNS
+#define AppHttpDNS              @"http://47.74.19.250:9888/dns/queryDNS?uri=www.6se.com"         //app初始化HttpDNS
 //校验会员
 #define ComfirmVipRegist  @"/video/confirmRegister"                             //校验是否注册vip成功
 #define ComfirmVipRight   @"/video/confirmMedia"                                //校验是否注册了vip
@@ -31,7 +31,9 @@
 #define HomeLikeList      @"/app/getLikeList"                                   //首页猜你喜欢
 #define HomeRecommend     @"/app/getRecommendList"                              //首页推荐
 #define HomeHotRecom      @"/app/getHotRecommendList"                           //首页热门推荐
-#define HomeCateList      @""                         //首页分类展示
+#define HomeRecToMe       @"/app/getFilmLibraryList"                            //首页为我推荐
+#define HomeCatData       @"/app/getFilmLibraryHostPage"                         //首页分类数据
+
 #define CategoryList      @"/app/getFilmLibraryByCateId"                        //分类下列表
 #define SearchVideoList   @"/app/getFilmLibraryByName"                          //搜索视频列表
 #define SearchPhotoList   @"/app/getPictureLibraryByName"                       //搜索图片列表
